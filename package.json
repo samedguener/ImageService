@@ -1,18 +1,18 @@
 {
-    "name": "teamretailapi",
-    "description": "Backend of the Team Retail",
+    "name": "imageservice",
+    "description": "ImageService written in Golang",
     "version": "0.1.0",
     "repository": {
         "type": "git",
-        "url": "https://github.com/samedguener/teamretailapi.git"
+        "url": "https://github.com/samedguener/imageservice.git"
       },
       "keywords": [],
-      "author": "Samed Güner <github@samedguener.com>, Torsten Rieger <trieger85@gmail.com>",
+      "author": "Samed Güner <github@samedguener.com>",
       "license": "MIT",
       "bugs": {
-        "url": "https://github.com/samedguener/teamretailapi/issues"
+        "url": "https://github.com/samedguener/imageservice/issues"
       },
-      "homepage": "https://github.com/samedguener/teamretailapi",
+      "homepage": "https://github.com/samedguener/imageservice",
       "release": {
         "plugins" : ["@semantic-release/commit-analyzer", "@semantic-release/release-notes-generator", "@semantic-release/github"]
       }
