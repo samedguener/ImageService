@@ -1,4 +1,4 @@
-service: imageservice
+service: images
 runtime: go113
 
 handlers:
