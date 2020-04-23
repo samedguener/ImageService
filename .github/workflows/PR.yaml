@@ -1,0 +1,44 @@
+name: PR
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  PR-Job:
+    name: PR
+    runs-on: ubuntu-latest
+    env:
+      region : europe-west1
+      GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID_STAGING}}
+      ENVIRONMENT: staging
+    steps:
+    - uses: actions/checkout@master
+    - uses: deepakputhraya/action-pr-title@master
+      with:
+        regex: '([a-z\(\)])+:([a-z ])+'
+        allowed_prefixes: 'feature,chore,fix,Feat,Feature,feat,Chore,Fix'
+        prefix_case_sensitive: false
+        min_length: 5
+        max_length: 124
+    - uses: actions/setup-go@v2-beta
+      with:
+        stable: 'true'
+        go-version: '1.13.7'
+    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@0.1.2
+      with:
+        service_account_email: ${{ secrets.GCP_SA_EMAIL_STAGING }}
+        service_account_key: ${{ secrets.GCP_SA_SECRET_STAGING }}
+        export_default_credentials: true
+    - name: gcloud Set up
+      run: gcloud config set project ${{ secrets.GCP_PROJECT_ID_STAGING }}
+    - name: Run Unit Tests
+      run: make test
+    - name: Prepare app.yaml
+      run: ./scripts/prepare_app-yaml.sh "${{ env.ENVIRONMENT }}"
+    - name: Deploy Application
+      run: make deploy serviceaccount=${{ secrets.GCP_SA_EMAIL_STAGING }}
+    - name: Run Smoke Tests
+      run: make smoke
+    - name: Run Integration Tests
+      run: make integration

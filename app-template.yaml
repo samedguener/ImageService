@@ -1,0 +1,12 @@
+service: imageservice
+runtime: go113
+
+handlers:
+- url: /.*
+  script: auto
+  secure: always
+  redirect_http_response_code: 301
+
+env_variables:
+  # These env variables are subsituted during deployment
+    ENVIRONMENT: $environment

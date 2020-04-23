@@ -1,0 +1,19 @@
+{
+    "name": "teamretailapi",
+    "description": "Backend of the Team Retail",
+    "version": "0.1.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/samedguener/teamretailapi.git"
+      },
+      "keywords": [],
+      "author": "Samed Güner <github@samedguener.com>, Torsten Rieger <trieger85@gmail.com>",
+      "license": "MIT",
+      "bugs": {
+        "url": "https://github.com/samedguener/teamretailapi/issues"
+      },
+      "homepage": "https://github.com/samedguener/teamretailapi",
+      "release": {
+        "plugins" : ["@semantic-release/commit-analyzer", "@semantic-release/release-notes-generator", "@semantic-release/github"]
+      }
+  }
