@@ -2,7 +2,7 @@
 
 ENVIRONMENT=$1
 
-if [ "$#" -ne 8 ]; then
+if [ "$#" -ne 1 ]; then
     echo "Incorrect number of parameters"
     exit 1
 fi
