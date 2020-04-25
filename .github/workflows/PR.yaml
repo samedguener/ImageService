@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       region : europe-west1
-      GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID_STAGING}}
       ENVIRONMENT: staging
+      AUTHENTICATION_METHOD: firebase
     steps:
     - uses: actions/checkout@master
     - uses: deepakputhraya/action-pr-title@master
@@ -35,7 +35,7 @@ jobs:
     - name: Run Unit Tests
       run: make test
     - name: Prepare app.yaml
-      run: ./scripts/prepare_app-yaml.sh "${{ env.ENVIRONMENT }}"
+      run: ./scripts/prepare_app-yaml.sh "${{ env.ENVIRONMENT }}" "${{ secrets.GCP_IMAGE_BUCKET_NAME }}" "${{ secrets.GCP_IMAGE_ACCESS_ENDPOINT }}" "${{ env.AUTHENTICATION_METHOD }}" "${{ secrets.GCP_PROJECT_ID_STAGING }}"
     - name: Deploy Application
       run: make deploy serviceaccount=${{ secrets.GCP_SA_EMAIL_STAGING }}
     - name: Run Smoke Tests

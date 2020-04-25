@@ -34,6 +34,8 @@ const (
 	NotFound
 	// Internal error
 	Internal
+	// UnprocessableEntity error
+	UnprocessableEntity
 )
 
 type customError struct {

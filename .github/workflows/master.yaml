@@ -11,6 +11,7 @@ jobs:
     env:
       region : europe-west1
       ENVIRONMENT: staging
+      AUTHENTICATION_METHOD: firebase
     steps:
     - uses: actions/checkout@v2.0.0
     - uses: actions/setup-go@v1.1.2
@@ -27,7 +28,7 @@ jobs:
     - name: Run Unit Tests
       run: make test
     - name: Prepare app.yaml
-      run: ./scripts/prepare_app-yaml.sh "${{ env.ENVIRONMENT }}"
+      run: ./scripts/prepare_app-yaml.sh "${{ env.ENVIRONMENT }}" "${{ secrets.GCP_IMAGE_BUCKET_NAME }}" "${{ secrets.GCP_IMAGE_ACCESS_ENDPOINT }}" "${{ env.AUTHENTICATION_METHOD }}" "${{ secrets.GCP_PROJECT_ID_STAGING }}"
     - name: Promote Application in Staging
       run: make promote serviceaccount=${{ secrets.GCP_SA_EMAIL_STAGING }}
     - name: Run Integration Tests

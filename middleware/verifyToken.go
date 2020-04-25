@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -14,7 +13,7 @@ import (
 // VerifyToken ...
 func VerifyToken(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var ctx context.Context
+		var ctx = r.Context()
 
 		if utils.AuthenticationMethod.Value == "firebase" {
 			reqToken := r.Header.Get("Authorization")

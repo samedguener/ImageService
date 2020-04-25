@@ -19,6 +19,7 @@ import (
 
 func main() {
 	utils.InitEnvironmentVariables()
+	utils.InitGCPCloudStorageBucket()
 	initLogger()
 
 	root := mux.NewRouter()
@@ -29,10 +30,13 @@ func main() {
 	api := root.PathPrefix("/api/v1").Subrouter()
 
 	api.HandleFunc("/health", handlers.Health.Get).Methods(http.MethodGet)
+	api.HandleFunc("/images/endpoint", handlers.Images.GetImageAccessEndpoint).Methods(http.MethodGet)
 
 	/*** Secured ***/
 	securedAPI := root.PathPrefix("/api/v1").Subrouter()
 	securedAPI.Use(middleware.VerifyToken)
+	securedAPI.HandleFunc("/images/endpoint", handlers.Images.GetImageAccessEndpoint).Methods(http.MethodGet)
+	securedAPI.HandleFunc("/images", handlers.Images.Post).Methods(http.MethodPost)
 
 	port := os.Getenv("PORT")
 	if port == "" {
