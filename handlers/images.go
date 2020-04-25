@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
 
 	"github.com/samedguener/ImageService/dtos"
@@ -21,6 +23,8 @@ type images struct {
 func (i images) GetImageAccessEndpoint(w http.ResponseWriter, r *http.Request) {
 	var imageAccessEndpoint dtos.ImageAccessEndpointResponse = dtos.ImageAccessEndpointResponse{}
 	imageAccessEndpoint.Endpoint = utils.ImageAccessEndpoint.Value
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(imageAccessEndpoint)
 }
 
@@ -37,13 +41,14 @@ func (i images) Post(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	fileHeader := make([]byte, 512)
-	if _, err := file.Read(fileHeader); err != nil {
+	fullFile := bytes.NewBuffer(nil)
+	if _, err := io.Copy(fullFile, file); err != nil {
 		err = errors.UnprocessableEntityHTTP.New("could not read image from request")
 		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
 
+	fileHeader := fullFile.Bytes()[:512]
 	imageType := http.DetectContentType(fileHeader)
 	if imageType != "image/png" && imageType != "image/jpg" && imageType != "image/jpeg" {
 		err = errors.UnprocessableEntityHTTP.New("unsupported image type")
@@ -51,7 +56,7 @@ func (i images) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	imageID, err := services.Images.UploadImage(ctx, file, imageType)
+	imageID, err := services.Images.UploadImage(ctx, fullFile.Bytes(), imageType)
 	if err != nil {
 		switch errors.GetType(err) {
 		case errors.Internal:
@@ -67,6 +72,8 @@ func (i images) Post(w http.ResponseWriter, r *http.Request) {
 	var response dtos.ImageUploadResponse
 	response.ID = imageID
 
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 

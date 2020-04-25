@@ -10,3 +10,7 @@ handlers:
 env_variables:
   # These env variables are subsituted during deployment
     ENVIRONMENT: $environment
+    BUCKET_NAME: $bucketname
+    IMAGE_ACCESS_ENDPOINT: $imageaccessendpoint
+    AUTHENTICATION_METHOD: $authenticationmethod
+    PROJECT_ID: $projectid

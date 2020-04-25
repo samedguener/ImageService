@@ -1,13 +1,11 @@
 package services
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"io"
-	"mime/multipart"
 	"time"
 
+	"cloud.google.com/go/storage"
 	"github.com/google/uuid"
 	"github.com/samedguener/ImageService/errors"
 	"github.com/samedguener/ImageService/utils"
@@ -20,7 +18,7 @@ var Images = images{}
 type images struct {
 }
 
-func (i images) UploadImage(ctx context.Context, image multipart.File, imageType string) (string, error) {
+func (i images) UploadImage(ctx context.Context, image []byte, imageType string) (string, error) {
 	bucket, err := utils.GetBucket()
 	if err != nil {
 		return "", err
@@ -29,24 +27,19 @@ func (i images) UploadImage(ctx context.Context, image multipart.File, imageType
 	fileExtension := ".jpeg"
 	switch imageType {
 	case "image/png":
-		fileExtension = ".png"
+		fileExtension = "png"
 		break
 	case "image/jpg":
-		fileExtension = ".jpg"
+		fileExtension = "jpg"
 		break
 	case "image/jpeg":
-		fileExtension = ".jpeg"
+		fileExtension = "jpeg"
 		break
 	default:
 		return "", errors.Internal.Newf("unknown image type '%s'", imageType)
 	}
 	uuid := uuid.New()
 	filename := fmt.Sprintf("%s.%s", uuid.String(), fileExtension)
-
-	buf := bytes.NewBuffer(nil)
-	if _, err := io.Copy(buf, image); err != nil {
-		return "", errors.UnprocessableEntity.Wrap(err, "unable to read image into buffer")
-	}
 
 	timeout, err := time.ParseDuration(utils.ImageUploadToGCPTimeout.Value)
 	if err != nil {
@@ -55,13 +48,18 @@ func (i images) UploadImage(ctx context.Context, image multipart.File, imageType
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	fileWriter := bucket.Object(filename).NewWriter(ctx)
-	if _, err = io.Copy(fileWriter, buf); err != nil {
+	object := bucket.Object(filename)
+	fileWriter := object.NewWriter(ctx)
+
+	if _, err = fileWriter.Write(image); err != nil {
 		return "", errors.Internal.Wrap(err, "could not upload image")
 	}
 	if err := fileWriter.Close(); err != nil {
 		return "", errors.Internal.Wrap(err, "could not upload image")
 	}
+
+	acl := object.ACL()
+	acl.Set(ctx, storage.AllUsers, storage.RoleReader)
 
 	logrus.Infof("image with name '%s' uploaded", filename)
 	return filename, nil
