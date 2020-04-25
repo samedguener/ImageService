@@ -24,7 +24,7 @@ func (i images) UploadImage(ctx context.Context, image []byte, imageType string)
 		return "", err
 	}
 
-	fileExtension := ".jpeg"
+	var fileExtension string
 	switch imageType {
 	case "image/png":
 		fileExtension = "png"
