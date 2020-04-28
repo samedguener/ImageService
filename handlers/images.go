@@ -10,6 +10,7 @@ import (
 	"github.com/samedguener/ImageService/errors"
 	"github.com/samedguener/ImageService/services"
 	"github.com/samedguener/ImageService/utils"
+	"github.com/sirupsen/logrus"
 )
 
 // Images ..
@@ -33,9 +34,10 @@ func (i images) Post(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	r.ParseMultipartForm(32 << 20)
 
+	logrus.Info(r.FormValue("image"))
 	file, _, err := r.FormFile("image")
 	if err != nil {
-		err = errors.BadRequestHTTP.New("could not read image from request")
+		err = errors.BadRequestHTTP.Wrap(err, "could not read image from request")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -43,7 +45,7 @@ func (i images) Post(w http.ResponseWriter, r *http.Request) {
 
 	fullFile := bytes.NewBuffer(nil)
 	if _, err := io.Copy(fullFile, file); err != nil {
-		err = errors.UnprocessableEntityHTTP.New("could not read image from request")
+		err = errors.UnprocessableEntityHTTP.Wrap(err, "could not read image from request")
 		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
