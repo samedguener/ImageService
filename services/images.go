@@ -65,6 +65,26 @@ func (i images) UploadImage(ctx context.Context, image []byte, imageType string)
 	return filename, nil
 }
 
-func (i images) DeleteImage(hash string) error {
+func (i images) DeleteImage(ctx context.Context, id string) error {
+	bucket, err := utils.GetBucket()
+	if err != nil {
+		return err
+	}
+
+	object := bucket.Object(id)
+	_, err = object.Attrs(ctx)
+	if err != nil {
+		switch err {
+		case storage.ErrObjectNotExist:
+			return errors.NotFound.Newf("image with id '%s' not found", id)
+		default:
+			return errors.Internal.Wrapf(err, "internal server error")
+		}
+	}
+	object.Delete(context.Background())
+	if err != nil {
+		return errors.Internal.Wrapf(err, "internal server error")
+	}
+	logrus.Infof("image with id '%s' successfully deleted", id)
 	return nil
 }

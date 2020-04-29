@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/samedguener/ImageService/dtos"
 	"github.com/samedguener/ImageService/errors"
 	"github.com/samedguener/ImageService/services"
@@ -80,7 +81,25 @@ func (i images) Post(w http.ResponseWriter, r *http.Request) {
 }
 
 // Delete ...
-func (i images) Delete(w http.ResponseWriter, r *http.Request) error {
+func (i images) Delete(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["imageId"]
 
-	return nil
+	err := services.Images.DeleteImage(r.Context(), id)
+	if err != nil {
+		switch errors.GetType(err) {
+		case errors.Internal:
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			break
+		case errors.UnprocessableEntity:
+			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+			break
+		case errors.NotFound:
+			http.Error(w, err.Error(), http.StatusNotFound)
+			break
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
