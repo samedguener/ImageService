@@ -35,8 +35,8 @@ func main() {
 	/*** Secured ***/
 	securedAPI := root.PathPrefix("/api/v1").Subrouter()
 	securedAPI.Use(middleware.VerifyToken)
-	securedAPI.HandleFunc("/images/endpoint", handlers.Images.GetImageAccessEndpoint).Methods(http.MethodGet)
 	securedAPI.HandleFunc("/images", handlers.Images.Post).Methods(http.MethodPost)
+	securedAPI.HandleFunc("/images/{imageId}", handlers.Images.Delete).Methods(http.MethodDelete)
 
 	port := os.Getenv("PORT")
 	if port == "" {
